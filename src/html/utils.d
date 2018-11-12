@@ -17,28 +17,6 @@ bool isAllWhite(Char)(Char[] value) {
 }
 
 
-bool requiresQuotes(Char)(Char[] value) {
-	auto ptr = value.ptr;
-	const end = ptr + value.length;
-
-	while (ptr != end) {
-		switch (*ptr++) {
-		case 'a': .. case 'z':
-		case 'A': .. case 'Z':
-		case '0': .. case '9':
-		case '-':
-		case '_':
-		case '.':
-		case ':':
-			continue;
-		default:
-			return true;
-		}
-	}
-	return false;
-}
-
-
 bool equalsCI(CharA, CharB)(const(CharA)[] a, const(CharB)[] b) {
 	if (a.length == b.length) {
 		for (size_t i; i < a.length; ++i) {

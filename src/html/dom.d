@@ -601,14 +601,9 @@ class Node {
 				app.put(attr);
 
 				if (value.length) {
-					if (value.requiresQuotes) {
-						app.put("=\"");
-						app.writeQuotesEscaped(value);
-						app.put("\"");
-					} else {
-						app.put('=');
-						app.put(value);
-					}
+					app.put("=\"");
+					app.writeQuotesEscaped(value);
+					app.put("\"");
 				}
 			}
 
@@ -669,14 +664,9 @@ class Node {
 				app.put(attr);
 
 				if (value.length) {
-					if (value.requiresQuotes) {
-						app.put("=\"");
-						app.writeQuotesEscaped(value);
-						app.put("\"");
-					} else {
-						app.put('=');
-						app.put(value);
-					}
+					app.put("=\"");
+					app.writeQuotesEscaped(value);
+					app.put("\"");
 				}
 			}
 
@@ -1127,6 +1117,12 @@ unittest {
 	assert(doc.root.outerHTML == `<root><br><div></div></root>`, doc.root.outerHTML);
 }
 
+// quotes should be preserved as they are mandatory in SVG
+unittest {
+	auto doc = createDocument(`<svg><text x="7" /></svg>`);
+	assert(doc.root.outerHTML == `<root><svg><text x="7"></text></svg></root>`, doc.root.outerHTML);
+}
+
 // toString prints elements with content as <tag attr="value"/>
 unittest {
 	// self-closed element w/o content
@@ -1346,8 +1342,8 @@ private:
 
 
 unittest {
-	const(char)[] src = `<parent attr=value><child></child>text</parent>`;
-	auto doc = createDocument(src);
+	const(char)[] src = `<parent attr="value"><child></child>text</parent>`;
+	auto doc = createDocument(`<parent attr=value><child></child>text</parent>`);
 	assert(doc.root.html == src, doc.root.html);
 
 	const(char)[] srcq = `<parent attr="v a l u e"><child></child>text</parent>`;
@@ -1366,11 +1362,11 @@ unittest {
 	auto child = cloned.find("child").front.clone;
 	child.attr("attr", "test");
 	cloned.find("parent").front.appendChild(child);
-	assert(cloned.html == `<parent attr=value><child></child>text<child attr=test></child></parent>`, cloned.html);
+	assert(cloned.html == `<parent attr="value"><child></child>text<child attr="test"></child></parent>`, cloned.html);
 	assert(doc.root.html == src, doc.root.html);
 
 	child.text = "text";
-	assert(cloned.html == `<parent attr=value><child></child>text<child attr=test>text</child></parent>`, cloned.html);
+	assert(cloned.html == `<parent attr="value"><child></child>text<child attr="test">text</child></parent>`, cloned.html);
 	assert(doc.root.html == src, doc.root.html);
 
 	// document cloning
