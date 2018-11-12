@@ -602,7 +602,7 @@ class Node {
 
 				if (value.length) {
 					app.put("=\"");
-					app.writeQuotesEscaped(value);
+					app.writeHTMLEscaped!(Yes.escapeQuotes)(value);
 					app.put("\"");
 				}
 			}
@@ -628,7 +628,7 @@ class Node {
 			}
 			break;
 		case Text:
-			app.put(tag_);
+			app.writeHTMLEscaped!(No.escapeQuotes)(tag_);
 			break;
 		case Comment:
 			app.put("<!--");
@@ -665,7 +665,7 @@ class Node {
 
 				if (value.length) {
 					app.put("=\"");
-					app.writeQuotesEscaped(value);
+					app.writeHTMLEscaped!(Yes.escapeQuotes)(value);
 					app.put("\"");
 				}
 			}
@@ -758,7 +758,7 @@ class Node {
 					} else {
 						space = false;
 					}
-					app.put(ch);
+					app.writeHTMLEscaped!(No.escapeQuotes)(ch);
 				}
 			}
 			break;
@@ -1095,11 +1095,22 @@ unittest {
 	auto doc = createDocument(`<html><body>&nbsp;</body></html>`);
 	assert(doc.root.outerHTML == "<root><html><body>\&nbsp;</body></html></root>");
 	doc = createDocument!(DOMCreateOptions.None)(`<html><body>&nbsp;</body></html>`);
-	assert(doc.root.outerHTML == `<root><html><body>&nbsp;</body></html></root>`);
+	assert(doc.root.outerHTML == `<root><html><body>&amp;nbsp;</body></html></root>`);
 	doc = createDocument(`<script>&nbsp;</script>`);
 	assert(doc.root.outerHTML == `<root><script>&nbsp;</script></root>`, doc.root.outerHTML);
 	doc = createDocument(`<style>&nbsp;</style>`);
 	assert(doc.root.outerHTML == `<root><style>&nbsp;</style></root>`, doc.root.outerHTML);
+}
+
+unittest {
+	string src = `&lt;script&gt;alert("test&amp;");&lt;/script&gt;`;
+	auto doc = createDocument(src);
+	assert(doc.root.html == src, doc.root.html);
+	assert(doc.root.compactHTML == src, doc.root.compactHTML);
+	src = `<div title="&gt;&lt;script&gt;alert('test&amp;');&lt;/script&gt;"></div>`;
+	doc = createDocument(src);
+	assert(doc.root.html == src, doc.root.html);
+	assert(doc.root.compactHTML == src, doc.root.compactHTML);
 }
 
 unittest {

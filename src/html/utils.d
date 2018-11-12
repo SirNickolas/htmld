@@ -57,42 +57,32 @@ hash_t tagHashOf(const(char)[] x) {
 }
 
 
-void writeQuotesEscaped(Appender)(ref Appender app, const(char)[] x) {
-	foreach (dchar ch; x) {
-		switch (ch) {
+void writeHTMLEscaped(Flag!q{escapeQuotes} escapeQuotes, Appender)(ref Appender app, dchar ch) {
+	switch (ch) {
+		static if (escapeQuotes) {
 			case '"':
 				app.put("&#34;"); // shorter than &quot;
 				static assert('"' == 34);
 				break;
-			default:
-				app.put(ch);
-				break;
 		}
+		case '<':
+			app.put("&lt;");
+			break;
+		case '>':
+			app.put("&gt;");
+			break;
+		case '&':
+			app.put("&amp;");
+			break;
+		default:
+			app.put(ch);
+			break;
 	}
 }
 
 
 void writeHTMLEscaped(Flag!q{escapeQuotes} escapeQuotes, Appender)(ref Appender app, const(char)[] x) {
 	foreach (dchar ch; x) {
-		switch (ch) {
-			static if (escapeQuotes) {
-				case '"':
-					app.put("&#34;"); // shorter than &quot;
-					static assert('"' == 34);
-					break;
-			}
-			case '<':
-				app.put("&lt;");
-				break;
-			case '>':
-				app.put("&gt;");
-				break;
-			case '&':
-				app.put("&amp;");
-				break;
-			default:
-				app.put(ch);
-				break;
-		}
+		writeHTMLEscaped!escapeQuotes(app, ch);
 	}
 }
